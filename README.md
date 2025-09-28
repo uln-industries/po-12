@@ -6,7 +6,7 @@ https://github.com/jakeisnt/po-12/assets/29869612/afb94a7d-d3a8-4d2c-ab2d-9ad00d
 
 ## Getting Started
 
-Install `bun` and `Node.js`. 
+Install `bun` and `node`.
 
 Run the development server:
 
