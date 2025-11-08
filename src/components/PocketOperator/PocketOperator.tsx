@@ -3,8 +3,8 @@
 import { cn } from "@/lib/utils";
 import type { Dispatch, SetStateAction } from "react";
 import NumberedButton from "./numberedButton";
-import useDeviceAnimations from "@/hooks/useDeviceAnimations";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import useFigureAnimator from "@/hooks/useFigureAnimator";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Button, { ButtonStatus } from "./POButton";
 import LCD from "../LCD";
 import classes from "./pocketOperator.module.scss";
@@ -62,7 +62,6 @@ type PatternConfig = {
   selectedPattern: number;
   queueSelectedPattern: (pattern: number) => void;
   queuedSelectedPattern: number | null;
-  spoolState: number;
 };
 
 type PocketOperatorProps = {
@@ -98,7 +97,6 @@ const PocketOperator = ({
     selectedPattern,
     queueSelectedPattern,
     queuedSelectedPattern,
-    spoolState,
   },
 }: PocketOperatorProps) => {
   // Tumbler levels: [0, 8]. set by the two knobs
@@ -123,9 +121,13 @@ const PocketOperator = ({
     [currentBeatIndex, playing]
   );
 
-  const { animationState, triggerAnimation } = useDeviceAnimations({
+  const figureRef = useRef<SVGSVGElement | null>(null);
+
+  const { triggerAnimation } = useFigureAnimator({
+    figureRef,
     soundsPlaying,
     bpm,
+    suspend: Boolean(queuedSelectedPattern),
   });
 
   /**
@@ -239,7 +241,6 @@ const PocketOperator = ({
         </div>
       </div>
       <LCD
-        spoolState={spoolState}
         uploadingState={uploadingState}
         selectedSound={selectedSound}
         bpm={bpm}
@@ -252,9 +253,9 @@ const PocketOperator = ({
         recording={recording}
         setRecording={setRecording}
         queuedSelectedPattern={queuedSelectedPattern}
-        animationState={animationState}
         tumblerALevel={tumblerALevel}
         tumblerBLevel={tumblerBLevel}
+        figureRef={figureRef}
       />
       <div className={classes.buttonsTop}>
         <Button

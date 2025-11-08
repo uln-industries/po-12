@@ -1,7 +1,6 @@
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Pattern } from "@/lib/types";
-import { flushSync } from "react-dom";
 
 /**
  * Use the selected pattern stored on local storage.
@@ -30,8 +29,14 @@ const useSelectedPattern = ({
     number | null
   >(null);
 
-  // 0 is default
-  const [spoolState, setQueuedSpoolState] = useState<number>(0);
+  const manualQueueTimeoutRef = useRef<number | null>(null);
+
+  const clearManualQueueTimeout = () => {
+    if (manualQueueTimeoutRef.current) {
+      clearTimeout(manualQueueTimeoutRef.current);
+      manualQueueTimeoutRef.current = null;
+    }
+  };
 
   useEffect(() => {
     // if we have prequeued a selected pattern and we start the beat move it to the queue
@@ -57,34 +62,28 @@ const useSelectedPattern = ({
       prequeueSelectedPattern(patternNumber);
     } else {
       // if not playing, we set the pattern right away,
-      // but also trigger the queueing animation for a period of time
+      // but also keep the queued indicator alive for a brief animation window
       queueSelectedPattern(patternNumber);
       setSelectedPattern(patternNumber);
 
-      const queuedSpoolStateOffset = 60000 / bpm / 6;
+      clearManualQueueTimeout();
+      const queueDuration = (60000 / bpm / 6) * 6;
 
-      const updateSpoolState = (n: 0 | 1 | 2 | 3) =>
-        flushSync(() => setQueuedSpoolState(n));
-
-      setTimeout(() => updateSpoolState(1), queuedSpoolStateOffset);
-      setTimeout(() => updateSpoolState(2), queuedSpoolStateOffset * 2);
-      setTimeout(() => updateSpoolState(3), queuedSpoolStateOffset * 3);
-      setTimeout(() => updateSpoolState(2), queuedSpoolStateOffset * 4);
-      setTimeout(() => updateSpoolState(1), queuedSpoolStateOffset * 5);
-      setTimeout(() => {
-        updateSpoolState(0);
+      manualQueueTimeoutRef.current = window.setTimeout(() => {
         queueSelectedPattern(null);
-      }, queuedSpoolStateOffset * 6);
+        manualQueueTimeoutRef.current = null;
+      }, queueDuration);
     }
   };
 
   // the currently selected pattern
   const currentPattern = patterns[selectedPattern - 1];
 
+  useEffect(() => clearManualQueueTimeout, []);
+
   return {
     currentPattern,
     selectedPattern,
-    spoolState,
     queuedSelectedPattern,
     queueSelectedPattern: queueSelectedPatternExternal,
     setSelectedPattern,

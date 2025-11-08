@@ -9,9 +9,9 @@ import CoolFigure from "./CoolFigure";
 
 import { SuccessIcon, FailIcon, PlayingIcon, RecordingIcon } from "./icons";
 import MetronomeAndMode from "./MetronomeAndMode";
-import type { AnimationState } from "@/lib/utils";
 import BottomBeatIndicator from "./BottomBeatIndicator";
 import { cn } from "@/lib/utils";
+import type { RefObject } from "react";
 
 type LCDProps = {
   bpm: number;
@@ -25,11 +25,10 @@ type LCDProps = {
   recording: boolean;
   setRecording: (recording: boolean) => void;
   queuedSelectedPattern: number | null;
+  figureRef: RefObject<SVGSVGElement | null>;
   tumblerALevel: number;
   tumblerBLevel: number;
-  animationState: AnimationState;
   uploadingState: "fail" | "success" | undefined;
-  spoolState?: number;
 };
 
 /**
@@ -47,11 +46,10 @@ const LCD = ({
   recording,
   setRecording,
   queuedSelectedPattern,
+  figureRef,
   tumblerALevel,
   tumblerBLevel,
-  animationState,
   uploadingState,
-  spoolState,
 }: LCDProps) => {
   const currentBeatInteger = Math.floor(currentBeat % 16);
 
@@ -93,14 +91,11 @@ const LCD = ({
           playing={playing}
           currentBeat={currentBeat}
           queuedSelectedPattern={queuedSelectedPattern}
-          spoolState={spoolState}
+          bpm={bpm}
         />
       </div>
       <div className={classes.coolFigureBlock}>
-        <CoolFigure
-          queuedSelectedPattern={queuedSelectedPattern}
-          animationState={animationState}
-        />
+        <CoolFigure ref={figureRef} queuedSelectedPattern={queuedSelectedPattern} />
       </div>
       <PatternIndicators
         currentBeat={currentBeatInteger}
