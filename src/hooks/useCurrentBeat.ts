@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
-import { flushSync } from "react-dom";
 
 /**
  * Listen to the current beat of the pocket operator.
@@ -7,54 +6,76 @@ import { flushSync } from "react-dom";
 const useCurrentBeat = (bpm: number) => {
   const [currentBeat, setCurrentBeat] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const lastTickRef = useRef<number | null>(null);
+  const beatRef = useRef(0);
 
   /**
-   * Start the pocket operator's continuous playback.
-   */
-  const startPlaying = useCallback((bpm: number) => {
-    intervalRef.current = setInterval(() => {
-      flushSync(() => setCurrentBeat((currentBeat) => currentBeat + 0.0625));
-    }, 60000 / 4 / 16 / bpm);
-
-    setPlaying(true);
-  }, []);
-
-  /**
-   * When the bpm changes, start a new interval with the new bpm.
+   * Drive beat progression with requestAnimationFrame so we only
+   * update React state once per frame instead of dozens of times.
    */
   useEffect(() => {
-    if (!intervalRef.current) {
+    if (!playing) {
       return;
     }
 
-    clearInterval(intervalRef.current);
-    startPlaying(bpm);
-  }, [bpm, startPlaying]);
+    const tick = (timestamp: number) => {
+      if (lastTickRef.current == null) {
+        lastTickRef.current = timestamp;
+      }
 
-  /**
-   * Start the pocket operator's continuous playback.
-   */
-  const play = useCallback(() => {
-    if (intervalRef.current) {
-      return;
-    }
+      const delta = timestamp - (lastTickRef.current ?? timestamp);
+      lastTickRef.current = timestamp;
 
-    startPlaying(bpm);
-  }, [bpm, startPlaying]);
+      // 16th note duration in ms.
+      const stepDuration = 60000 / Math.max(bpm, 1) / 4;
+      const increment = delta / stepDuration;
+
+      if (increment > 0) {
+        beatRef.current += increment;
+        setCurrentBeat(beatRef.current);
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      lastTickRef.current = null;
+    };
+  }, [playing, bpm]);
 
   /**
    * Pause the pocket operator's continuous playback.
    */
   const pause = useCallback(() => {
-    if (!intervalRef.current) {
-      return;
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     }
 
-    clearInterval(intervalRef.current);
-    intervalRef.current = null;
-    setCurrentBeat(0);
     setPlaying(false);
+    beatRef.current = 0;
+    lastTickRef.current = null;
+    setCurrentBeat(0);
+  }, []);
+
+  /**
+   * Start the pocket operator's continuous playback.
+   */
+  const play = useCallback(() => {
+    setPlaying((isPlaying) => {
+      if (isPlaying) {
+        return isPlaying;
+      }
+      lastTickRef.current = null;
+      return true;
+    });
   }, []);
 
   /**
