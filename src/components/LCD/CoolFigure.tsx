@@ -1,34 +1,21 @@
 "use client";
 
-import type { AnimationState } from "@/lib/utils";
+import { forwardRef } from "react";
 import classes from "./lcd.module.scss";
 
 type CoolFigureProps = {
   queuedSelectedPattern?: number | null;
-  animationState: AnimationState;
 };
 
-const CoolFigure = ({
-  queuedSelectedPattern: isSwitchingPatterns,
-  animationState,
-}: CoolFigureProps) => {
-  const {
-    hittingKick,
-    hittingHighHat,
-    hittingDrum,
-    // if the guy has finished hitting the drum (high hat or drum), he goes to this resting state
-    finishedHittingDrum,
-    hittingClap,
-    finishedHittingClap,
-    hittingBell1,
-    hittingBell2,
-  } = animationState;
+const CoolFigure = forwardRef<SVGSVGElement, CoolFigureProps>(
+  ({ queuedSelectedPattern: isSwitchingPatterns }, ref) => {
 
   // the sounds playing change once per beat.
   // update the animation state based on the sounds playing.
 
   return (
     <svg
+      ref={ref}
       width="95"
       height="78"
       viewBox="0 0 95 78"
@@ -36,13 +23,10 @@ const CoolFigure = ({
       xmlns="http://www.w3.org/2000/svg"
     >
       {/* top left mallet */}
-      <g className={hittingHighHat ? classes.visible : classes.hidden}>
+      <g data-anim-show="hittingHighHat" className={classes.hidden}>
         <g
-          className={
-            !isSwitchingPatterns && (finishedHittingClap || hittingHighHat)
-              ? classes.visible
-              : classes.hidden
-          }
+          data-anim-show="finishedHittingClap hittingHighHat"
+          className={classes.hidden}
         >
           <rect
             x="21.8363"
@@ -75,19 +59,10 @@ const CoolFigure = ({
       </g>
 
       {/* center left mallet */}
-      <g
-        className={
-          !isSwitchingPatterns && finishedHittingDrum
-            ? classes.visible
-            : classes.hidden
-        }
-      >
+      <g data-anim-show="finishedHittingDrum" className={classes.hidden}>
         <g
-          className={
-            !isSwitchingPatterns && (hittingClap || finishedHittingDrum)
-              ? classes.visible
-              : classes.hidden
-          }
+          data-anim-show="hittingClap finishedHittingDrum"
+          className={classes.hidden}
         >
           <rect
             x="21.5"
@@ -120,17 +95,10 @@ const CoolFigure = ({
       </g>
 
       {/* bottom left mallet */}
-      <g
-        className={
-          !isSwitchingPatterns && hittingDrum ? classes.visible : classes.hidden
-        }
-      >
+      <g data-anim-show="hittingDrum" className={classes.hidden}>
         <g
-          className={
-            !isSwitchingPatterns && (finishedHittingClap || hittingDrum)
-              ? classes.visible
-              : classes.hidden
-          }
+          data-anim-show="finishedHittingClap hittingDrum"
+          className={classes.hidden}
         >
           <rect
             x="14.7678"
@@ -471,8 +439,9 @@ const CoolFigure = ({
 
       {/* right leg */}
       <g
+        data-anim-hide="hittingKick"
         className={
-          isSwitchingPatterns || hittingKick ? classes.hidden : classes.visible
+          isSwitchingPatterns ? classes.hidden : classes.visible
         }
       >
         <rect
@@ -498,13 +467,7 @@ const CoolFigure = ({
 
       {/* top right arm and hand \m/ */}
       <g className={classes.hidden}>
-        <g
-          className={
-            !isSwitchingPatterns && hittingBell1
-              ? classes.visible
-              : classes.hidden
-          }
-        >
+        <g data-anim-show="hittingBell1" className={classes.hidden}>
           <rect
             x="35.0711"
             y="37"
@@ -547,13 +510,7 @@ const CoolFigure = ({
 
       {/* middle right arm */}
       <g className={classes.hidden}>
-        <g
-          className={
-            !isSwitchingPatterns && hittingBell2
-              ? classes.visible
-              : classes.hidden
-          }
-        >
+        <g data-anim-show="hittingBell2" className={classes.hidden}>
           <rect
             x="29"
             y="48.5"
@@ -577,11 +534,7 @@ const CoolFigure = ({
       </g>
 
       {/* the leg that hits the foot pedal */}
-      <g
-        className={
-          !isSwitchingPatterns && hittingKick ? classes.visible : classes.hidden
-        }
-      >
+      <g data-anim-show="hittingKick" className={classes.hidden}>
         <path
           d="M28.5398 55.7872C28.2484 55.1613 28.5196 54.4178 29.1455 54.1265L38.3965 49.8203L39.4515 52.0868L30.2005 56.3929C29.5746 56.6843 28.8311 56.4131 28.5398 55.7872Z"
           fill="currentColor"
@@ -609,11 +562,8 @@ const CoolFigure = ({
           width="18"
           height="3"
           fill="currentColor"
-          className={
-            !isSwitchingPatterns && hittingKick
-              ? classes.visible
-              : classes.hidden
-          }
+          data-anim-show="hittingKick"
+          className={classes.hidden}
         />
         <rect
           x="41"
@@ -622,11 +572,8 @@ const CoolFigure = ({
           height="3"
           transform="rotate(-20.0417 41 62.1687)"
           fill="currentColor"
-          className={
-            !isSwitchingPatterns && hittingKick
-              ? classes.hidden
-              : classes.visible
-          }
+          data-anim-hide="hittingKick"
+          className={classes.visible}
         />
       </g>
 
@@ -639,12 +586,13 @@ const CoolFigure = ({
           width="1.5"
           height="8"
           fill="currentColor"
-          className={hittingBell1 ? classes.hidden : classes.visible}
+          data-anim-hide="hittingBell1"
+          className={classes.visible}
         />
       </g>
 
       {/* the bell at left */}
-      <g className={hittingBell1 ? classes.visible : classes.hidden}>
+      <g data-anim-show="hittingBell1" className={classes.hidden}>
         <path
           d="M40 16.5C40 18.9853 37.9654 21 35.4556 21C32.9458 21 30.9112 18.9853 30.9112 16.5C30.9112 14.0147 32.9458 12 35.4556 12C37.9654 12 40 14.0147 40 16.5Z"
           fill="currentColor"
@@ -659,7 +607,7 @@ const CoolFigure = ({
       </g>
 
       {/* the bell at right */}
-      <g className={!hittingBell1 ? classes.visible : classes.hidden}>
+      <g data-anim-hide="hittingBell1" className={classes.visible}>
         <path
           d="M45.9694 11.8584C48.4529 11.9538 50.386 14.1175 50.2871 16.6912C50.1882 19.2649 48.0948 21.274 45.6114 21.1786C43.1279 21.0831 41.1948 18.9194 41.2937 16.3457C41.3926 13.772 43.486 11.763 45.9694 11.8584Z"
           fill="currentColor"
@@ -680,6 +628,8 @@ const CoolFigure = ({
       </g>
     </svg>
   );
-};
+});
+
+CoolFigure.displayName = "CoolFigure";
 
 export default CoolFigure;

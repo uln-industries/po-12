@@ -75,7 +75,6 @@ const PocketOperatorWrapper = () => {
     selectedPattern,
     queueSelectedPattern,
     queuedSelectedPattern,
-    spoolState,
   } = useSelectedPattern({
     currentBeatIndex,
     patterns,
@@ -112,7 +111,6 @@ const PocketOperatorWrapper = () => {
               selectedPattern,
               queueSelectedPattern,
               queuedSelectedPattern,
-              spoolState,
             }}
           />
         </div>

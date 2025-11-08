@@ -3,6 +3,8 @@ import SpoolFeeder from "./SpoolFeeder";
 import SpoolStamp from "./SpoolStamp";
 import SpoolList from "./SpoolList";
 import SpinningWheel from "./SpinningWheel";
+import { useRef } from "react";
+import useSpoolAnimator from "./useSpoolAnimator";
 
 const lightningLeftEnabled = false;
 const lightningRightEnabled = false;
@@ -11,7 +13,7 @@ type SewingMachineProps = {
   playing: boolean;
   currentBeat: number;
   queuedSelectedPattern: number | null;
-  spoolState?: number;
+  bpm: number;
 };
 
 /**
@@ -21,8 +23,17 @@ const SewingMachine = ({
   playing,
   currentBeat,
   queuedSelectedPattern,
-  spoolState,
+  bpm,
 }: SewingMachineProps) => {
+  const spoolRef = useRef<SVGGElement | null>(null);
+
+  useSpoolAnimator({
+    spoolRef,
+    queuedSelectedPattern,
+    playing,
+    currentBeat,
+    bpm,
+  });
   return (
     <div>
       <svg
@@ -41,9 +52,7 @@ const SewingMachine = ({
           fill="currentColor"
         />
         <SpoolList
-          currentBeat={currentBeat}
-          queuedSelectedPattern={queuedSelectedPattern}
-          spoolState={spoolState}
+          spoolRef={spoolRef}
         />
 
         {/* the bottom part of the machine */}
