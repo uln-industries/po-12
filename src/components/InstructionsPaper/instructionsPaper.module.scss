@@ -258,6 +258,15 @@ $cardBorderRadius: 1px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
+  // Better sizing for touch devices
+  @media (pointer: coarse) {
+    width: 90vw;
+    max-width: 360px;
+    padding: 20px 28px;
+    font-size: 14px;
+    min-height: 140px;
+  }
 }
 
 .firstIntroCardBox {
