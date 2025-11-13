@@ -65,6 +65,7 @@ type ProductTourNoteProps = {
     text: string;
     classNameToClick: string;
   };
+  stepIndex: number;
   tilt: { x: number; y: number };
   hide: boolean;
   isCurrentStep: boolean;
@@ -76,6 +77,7 @@ type ProductTourNoteProps = {
 
 const ProductTourNote = ({
   step,
+  stepIndex,
   tilt: { x, y },
   hide,
   isCurrentStep,
@@ -84,6 +86,7 @@ const ProductTourNote = ({
   highlightNextButton,
   onNext,
 }: ProductTourNoteProps) => {
+  const { text: stepText, classNameToClick: stepTargetClassName } = step;
   const rotationXSkew = useMemo(
     () => (Math.random() - 0.5) * ROTATION_X_VARIANCE,
     []
@@ -107,119 +110,142 @@ const ProductTourNote = ({
   const currentCharIndex = useRef(0);
   const queuedChars = useRef<{ char: string; classNameToClick: string }[]>([]);
   const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startDelayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sentencePauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastStepIndexRef = useRef(stepIndex);
+
+  const clearAnimationTimers = () => {
+    if (animationIntervalRef.current) {
+      clearInterval(animationIntervalRef.current);
+      animationIntervalRef.current = null;
+    }
+    if (startDelayTimeoutRef.current) {
+      clearTimeout(startDelayTimeoutRef.current);
+      startDelayTimeoutRef.current = null;
+    }
+    if (sentencePauseTimeoutRef.current) {
+      clearTimeout(sentencePauseTimeoutRef.current);
+      sentencePauseTimeoutRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (lastStepIndexRef.current === stepIndex) {
+      return;
+    }
+
+    lastStepIndexRef.current = stepIndex;
+    clearAnimationTimers();
+    wordsSeenSoFar.current = "";
+    queuedChars.current = [];
+    currentCharIndex.current = 0;
+    setWordsDisplayed("");
+    setIsAnimationComplete(false);
+  }, [stepIndex]);
+
+  // Update character queue when the tour text changes
+  useEffect(() => {
+    const previouslySeen = wordsSeenSoFar.current;
+    const appendedText = previouslySeen && stepText.startsWith(previouslySeen)
+      ? stepText.slice(previouslySeen.length)
+      : stepText;
+
+    if (!appendedText) {
+      return;
+    }
+
+    const remainingChars =
+      currentCharIndex.current < queuedChars.current.length
+        ? queuedChars.current.slice(currentCharIndex.current)
+        : [];
+
+    const newChars = appendedText
+      .split("")
+      .map((char) => ({ char, classNameToClick: stepTargetClassName }));
+
+    queuedChars.current = [...remainingChars, ...newChars];
+    currentCharIndex.current = 0;
+    wordsSeenSoFar.current = stepText;
+  }, [stepTargetClassName, stepText]);
 
   // Handle text animation with interval instead of recursive setTimeout
   useEffect(() => {
-    if (!isCurrentStep) return;
-
-    // Clear any existing interval
-    if (animationIntervalRef.current) {
-      clearInterval(animationIntervalRef.current);
+    if (!isCurrentStep || queuedChars.current.length === 0) {
+      return;
     }
 
-    // Reset animation state when step changes
-    if (queuedChars.current.length > 0) {
-      currentCharIndex.current = 0;
-      setIsAnimationComplete(false);
+    setIsAnimationComplete(false);
+    clearAnimationTimers();
 
-      // Start animation after initial delay
-      const startTimeout = setTimeout(() => {
-        animationIntervalRef.current = setInterval(() => {
-          if (currentCharIndex.current >= queuedChars.current.length) {
-            if (animationIntervalRef.current) {
-              clearInterval(animationIntervalRef.current);
-            }
-            setIsAnimationComplete(true);
-            return;
-          }
-
-          const { char, classNameToClick } = queuedChars.current[
-            currentCharIndex.current
-          ];
-
-          if (char === ".") {
-            setWordsDisplayed((prev) => prev + char);
-            currentCharIndex.current++;
-            // Pause briefly after sentences for better readability
-            if (animationIntervalRef.current) {
-              clearInterval(animationIntervalRef.current);
-            }
-            setTimeout(() => {
-              if (isCurrentStep) {
-                animationIntervalRef.current = setInterval(
-                  animateNextChar,
-                  CHAR_DELAY_MS
-                );
-              }
-            }, SENTENCE_PAUSE_MS);
-          } else if (char === "|") {
-            // Special character - highlight the next button
-            highlightNextButton(classNameToClick);
-            currentCharIndex.current++;
-          } else {
-            setWordsDisplayed((prev) => prev + char);
-            currentCharIndex.current++;
-          }
-        }, CHAR_DELAY_MS);
-      }, INITIAL_DELAY_MS);
-
-      return () => {
-        clearTimeout(startTimeout);
-        if (animationIntervalRef.current) {
-          clearInterval(animationIntervalRef.current);
-        }
-      };
-    }
-
-    function animateNextChar() {
-      if (currentCharIndex.current >= queuedChars.current.length) {
-        if (animationIntervalRef.current) {
-          clearInterval(animationIntervalRef.current);
-        }
-        setIsAnimationComplete(true);
-        return;
+    const startTyping = () => {
+      if (animationIntervalRef.current) {
+        clearInterval(animationIntervalRef.current);
+        animationIntervalRef.current = null;
       }
 
-      const { char, classNameToClick } = queuedChars.current[
-        currentCharIndex.current
-      ];
+      animationIntervalRef.current = setInterval(() => {
+        if (currentCharIndex.current >= queuedChars.current.length) {
+          clearAnimationTimers();
+          queuedChars.current = [];
+          currentCharIndex.current = 0;
+          setIsAnimationComplete(true);
+          return;
+        }
 
-      if (char === "|") {
-        highlightNextButton(classNameToClick);
-        currentCharIndex.current++;
-      } else {
+        const { char, classNameToClick } =
+          queuedChars.current[currentCharIndex.current];
+
+        if (char === "|") {
+          highlightNextButton(classNameToClick);
+          currentCharIndex.current++;
+          return;
+        }
+
+        if (char === ".") {
+          setWordsDisplayed((prev) => prev + char);
+          currentCharIndex.current++;
+          if (animationIntervalRef.current) {
+            clearInterval(animationIntervalRef.current);
+            animationIntervalRef.current = null;
+          }
+          if (sentencePauseTimeoutRef.current) {
+            clearTimeout(sentencePauseTimeoutRef.current);
+          }
+          sentencePauseTimeoutRef.current = setTimeout(() => {
+            if (!isCurrentStep) {
+              return;
+            }
+            startTyping();
+          }, SENTENCE_PAUSE_MS);
+          return;
+        }
+
         setWordsDisplayed((prev) => prev + char);
         currentCharIndex.current++;
-      }
-    }
-  }, [isCurrentStep, highlightNextButton]);
+      }, CHAR_DELAY_MS);
+    };
 
-  // Update character queue when step changes
-  useEffect(() => {
-    const { text, classNameToClick } = step;
-    const newText = text.replace(wordsSeenSoFar.current, "").split("");
-    queuedChars.current.push(
-      ...newText.map((char) => ({
-        char,
-        classNameToClick,
-      }))
-    );
-    wordsSeenSoFar.current = text;
-  }, [step]);
+    startDelayTimeoutRef.current = setTimeout(startTyping, INITIAL_DELAY_MS);
+
+    return () => {
+      clearAnimationTimers();
+    };
+  }, [highlightNextButton, isCurrentStep, stepText]);
 
   // Skip animation and show full text
   const handleSkipAnimation = () => {
-    if (animationIntervalRef.current) {
-      clearInterval(animationIntervalRef.current);
-    }
+    clearAnimationTimers();
 
     // Show complete text without special characters
-    const fullText = step.text.replace(/\|/g, "");
+    const fullText = stepText.replace(/\|/g, "");
     setWordsDisplayed(fullText);
     setIsAnimationComplete(true);
+    queuedChars.current = [];
+    currentCharIndex.current = 0;
+    wordsSeenSoFar.current = stepText;
 
     // Trigger button highlight immediately
-    highlightNextButton(step.classNameToClick);
+    highlightNextButton(stepTargetClassName);
 
     // Proceed to next step if handler provided
     if (onNext) {

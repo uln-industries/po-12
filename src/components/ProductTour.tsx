@@ -89,9 +89,9 @@ const ProductTourContents = ({
         onClick={goToNextStep}
       />
       <ProductTourNote
-        key={`productTourNote-${currentStepIndex}-${currentSubStepIndex}`}
         tilt={tilt}
         step={currentStep}
+        stepIndex={currentStepIndex}
         hide={false}
         onClose={onFinish}
         restartTour={restartTour}
