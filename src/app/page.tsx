@@ -7,7 +7,8 @@ import { usePatterns } from "@/hooks/usePattern";
 import useCurrentBeat from "@/hooks/useCurrentBeat";
 
 import { SelectingMode } from "@/lib/utils";
-import InstructionsPaper from "@/components/InstructionsPaper/InstructionsPaper";
+import InstructionsModal from "@/components/InstructionsPaper/InstructionsModal";
+import HelpButton from "@/components/HelpButton/HelpButton";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import ProductTour from "@/components/ProductTour";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -31,9 +32,6 @@ const PocketOperatorWrapper = () => {
   useEffect(() => {
     setTimeout(() => setProductTourMode((curMode) => curMode ?? "intro"), 100);
   }, [setProductTourMode]);
-
-  const showInstructionsPaper =
-    productTourMode === "finished" && (show || pinned);
 
   const {
     patterns,
@@ -116,45 +114,26 @@ const PocketOperatorWrapper = () => {
         </div>
       </div>
 
-      <div
-        style={{
-          position: "absolute",
-          width: "auto",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "top",
-          transition: "top 0.2s ease",
-          transitionDelay: "0.25s",
-          top: showInstructionsPaper ? "26px" : "-130px",
-          ...(onTouchDevice
-            ? {}
-            : {
-                left: "2.5rem",
-                top: "2.5rem",
-                width: "10%",
-              }),
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowing(true);
-        }}
-        onMouseEnter={onTouchDevice ? undefined : () => setShowing(true)}
-      >
-        <InstructionsPaper
-          tilt={defaultTilt}
-          // if on a touch device, paper should always be expanded kinda
-          showing={show}
-          setShowing={setShowing}
-          pinned={pinned}
-          setPinned={setPinned}
-          onTouchDevice={onTouchDevice}
-          takeTour={() => {
-            setPinned(false);
-            setShowing(false);
-            setProductTourMode("intro");
-          }}
-        />
-      </div>
+      {productTourMode === "finished" && (
+        <>
+          <HelpButton
+            onClick={() => setShowing(true)}
+            onTouchDevice={onTouchDevice}
+          />
+          <InstructionsModal
+            showing={show}
+            setShowing={setShowing}
+            pinned={pinned}
+            setPinned={setPinned}
+            onTouchDevice={onTouchDevice}
+            takeTour={() => {
+              setPinned(false);
+              setShowing(false);
+              setProductTourMode("intro");
+            }}
+          />
+        </>
+      )}
 
       <ProductTour
         productTourMode={productTourMode}

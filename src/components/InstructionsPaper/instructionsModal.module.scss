@@ -1,0 +1,58 @@
+/* Modal overlay and content */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 998;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1rem;
+
+  animation: fadeIn 0.2s ease;
+}
+
+.modalContent {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile optimizations */
+@media (pointer: coarse) {
+  .modalOverlay {
+    padding: 0.5rem;
+  }
+}
