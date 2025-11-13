@@ -2,12 +2,34 @@ import React, { useState, useEffect, useRef } from "react";
 import classes from "./magnifyingGlass.module.scss";
 import { withinBbox } from "@/lib/dom";
 
+// Magnifying glass configuration constants
+const MAGNIFY_RADIUS = 65;
+const ELEMENT_PADDING = 10;
+const CLICK_ANIMATION_SHRINK = 5;
+const BORDER_RADIUS_OFFSET = 2;
+const INITIAL_HIDDEN_POSITION = -100;
+
+const DEFAULT_BORDER_RADIUS_CONFIG = {
+  borderRadius: "100%",
+};
+
+type BorderRadiusConfig = {
+  borderRadius: string;
+  borderTopLeftRadius?: string;
+  borderTopRightRadius?: string;
+  borderBottomLeftRadius?: string;
+  borderBottomRightRadius?: string;
+};
+
 /**
  * Get the border radius configuration.
  * @param elem  the element to get the config from
  * @param borderRadiusOffset the offset from the element to introduce if needed
  */
-const getBorderRadiusConfig = (elem: Element, borderRadiusOffset: number) => {
+const getBorderRadiusConfig = (
+  elem: Element,
+  borderRadiusOffset: number
+): BorderRadiusConfig => {
   const style = window.getComputedStyle(elem);
 
   const currentBorderRadius = Number.parseInt(style.borderRadius, 10);
@@ -38,31 +60,30 @@ const getBorderRadiusConfig = (elem: Element, borderRadiusOffset: number) => {
   };
 };
 
-// constants -> configuration for the glass.
-const radius = 65;
-const surroundPadding = 10;
-const radiusDiff = 5;
-const borderRadiusOffset = 2;
-
-const defaultBorderRadiusConfig = {
-  borderRadius: "100%",
+type FixedMagnifyingGlassProps = {
+  classNameToTarget?: string;
+  onClick: () => void;
 };
 
 /**
- * Magnifying glass fixed to a particular element.
+ * Magnifying glass fixed to a particular element during tutorial.
+ * Highlights the target element and responds to clicks.
  */
-const FixedMagnifyingGlass = ({ classNameToTarget, onClick }) => {
+const FixedMagnifyingGlass = ({
+  classNameToTarget,
+  onClick,
+}: FixedMagnifyingGlassProps) => {
   const [targetedElement, setTargetedElement] = useState<Element | null>(null);
-  const [position, setPosition] = useState({ x: -100, y: -100 });
-  const [offsetRadius, setOffsetRadius] = useState(0); // initial radius of the circle
+  const [position, setPosition] = useState({
+    x: INITIAL_HIDDEN_POSITION,
+    y: INITIAL_HIDDEN_POSITION,
+  });
+  const [offsetRadius, setOffsetRadius] = useState(0);
 
-  const [width, setWidth] = useState(radius);
-  const [height, setHeight] = useState(radius);
-  const [borderRadiusConfig, setBorderRadiusConfig] = useState<{
-    borderRadius: string;
-  }>(defaultBorderRadiusConfig);
-
-  const [glassCircle, setGlassCircle] = useState<HTMLDivElement | null>(null);
+  const [width, setWidth] = useState(MAGNIFY_RADIUS);
+  const [height, setHeight] = useState(MAGNIFY_RADIUS);
+  const [borderRadiusConfig, setBorderRadiusConfig] =
+    useState<BorderRadiusConfig>(DEFAULT_BORDER_RADIUS_CONFIG);
 
   // whenever the class name to target changes, change the targeted element
   useEffect(() => {
@@ -82,8 +103,8 @@ const FixedMagnifyingGlass = ({ classNameToTarget, onClick }) => {
     // set up the targeted element
     const bbox = targetedElement.getBoundingClientRect();
 
-    const nextWidth = bbox.width + surroundPadding;
-    const nextHeight = bbox.height + surroundPadding;
+    const nextWidth = bbox.width + ELEMENT_PADDING;
+    const nextHeight = bbox.height + ELEMENT_PADDING;
 
     setPosition({
       x: bbox.left + bbox.width / 2,
@@ -94,7 +115,7 @@ const FixedMagnifyingGlass = ({ classNameToTarget, onClick }) => {
     setHeight(nextHeight);
 
     setBorderRadiusConfig(
-      getBorderRadiusConfig(targetedElement, borderRadiusOffset)
+      getBorderRadiusConfig(targetedElement, BORDER_RADIUS_OFFSET)
     );
 
     // allow for the position to update when the window resizes
@@ -116,43 +137,42 @@ const FixedMagnifyingGlass = ({ classNameToTarget, onClick }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, [targetedElement]);
 
-  const mouseDownFiredWithinBbox = useRef(false);
+  const pointerDownFiredWithinBbox = useRef(false);
 
   useEffect(() => {
-    const handleMouseDown = (event: MouseEvent) => {
-      mouseDownFiredWithinBbox.current =
+    const handlePointerDown = (event: PointerEvent) => {
+      pointerDownFiredWithinBbox.current =
         (targetedElement &&
           withinBbox(event, targetedElement.getBoundingClientRect())) ||
         false;
 
-      if (mouseDownFiredWithinBbox.current) {
-        setOffsetRadius((prevRadius) => prevRadius - radiusDiff);
+      if (pointerDownFiredWithinBbox.current) {
+        setOffsetRadius((prevRadius) => prevRadius - CLICK_ANIMATION_SHRINK);
       }
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       setOffsetRadius(0);
 
-      if (mouseDownFiredWithinBbox.current) {
-        // remove the mousemove listener so we don't change the position anymore
-        // it's okay to do this because we know the onClick will reset which
-        // element this is highlighting
-        window.removeEventListener("pointerup", handleMouseUp);
-        window.removeEventListener("pointerdown", handleMouseDown);
+      if (pointerDownFiredWithinBbox.current) {
+        // Remove event listeners before calling onClick to prevent stale references
+        window.removeEventListener("pointerup", handlePointerUp);
+        window.removeEventListener("pointerdown", handlePointerDown);
 
         onClick();
-        mouseDownFiredWithinBbox.current = false;
+        pointerDownFiredWithinBbox.current = false;
       }
     };
 
-    window.addEventListener("pointerup", handleMouseUp);
-    window.addEventListener("pointerdown", handleMouseDown);
+    // Use pointer events for unified mouse/touch handling
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointerdown", handlePointerDown);
 
     return () => {
-      window.removeEventListener("pointerup", handleMouseUp);
-      window.removeEventListener("pointerdown", handleMouseDown);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, [glassCircle, targetedElement, onClick]);
+  }, [targetedElement, onClick]);
 
   return (
     <div
@@ -165,7 +185,6 @@ const FixedMagnifyingGlass = ({ classNameToTarget, onClick }) => {
       <div className={classes.magnifyingGlass}>
         <div
           className={classes.lens}
-          ref={setGlassCircle}
           style={{
             width: `${width + offsetRadius}px`,
             height: `${height + offsetRadius}px`,

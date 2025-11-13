@@ -4,6 +4,17 @@ import InstructionsCardButton from "./InstructionsCardButton";
 import classes from "./instructionsPaper.module.scss";
 import { cn } from "@/lib/utils";
 
+// Animation timing constants
+const CHAR_DELAY_MS = 40;
+const INITIAL_DELAY_MS = 200; // Reduced from 1000ms for faster start
+const SENTENCE_PAUSE_MS = 400;
+
+// Card rotation/position variance constants
+const ROTATION_X_VARIANCE = 10;
+const ROTATION_Y_VARIANCE = 10;
+const ROTATION_Z_VARIANCE = 3;
+const POSITION_VARIANCE = 10;
+
 type ProductTourIntroProps = {
   onClickNo: () => void;
   onClickYes: () => void;
@@ -35,7 +46,9 @@ const ProductTourIntro = ({
       <div>
         This device plays audio! Turn up your volume. Would you like a tour?
       </div>
-      <div>This will erase any current patterns.</div>
+      <div style={{ fontWeight: "bold", marginTop: "8px", color: "#8B4513" }}>
+        ⚠️ This will erase any current patterns.
+      </div>
       <div className="flex justify-end w-full gap-8">
         <InstructionsCardButton onClick={onClickNo}>no</InstructionsCardButton>
 
@@ -47,73 +60,200 @@ const ProductTourIntro = ({
   );
 };
 
-const delayInterval = 40;
+type ProductTourNoteProps = {
+  step: {
+    text: string;
+    classNameToClick: string;
+  };
+  stepIndex: number;
+  tilt: { x: number; y: number };
+  hide: boolean;
+  isCurrentStep: boolean;
+  onClose: () => void;
+  restartTour: () => void;
+  highlightNextButton: (className: string) => void;
+  onNext?: () => void;
+  allowCloseAfterStep?: boolean;
+};
+
 const ProductTourNote = ({
   step,
+  stepIndex,
   tilt: { x, y },
   hide,
   isCurrentStep,
   onClose,
   restartTour,
   highlightNextButton,
-}) => {
-  const rotationXSkew = useMemo(() => (Math.random() - 0.5) * 10, []);
-  const rotationYSkew = useMemo(() => (Math.random() - 0.5) * 10, []);
-  const rotationZSkew = useMemo(() => (Math.random() - 0.5) * 3, []);
-  const positionSkew = useMemo(() => (Math.random() - 0.5) * 10, []);
-
-  const [wordsDisplayed, setWordsDisplayed] = useState("");
-  const wordsSeenSoFar = useRef("");
-  const queuedLetters = useRef<{ char: string; classNameToClick: string }[]>(
+  onNext,
+  allowCloseAfterStep = false,
+}: ProductTourNoteProps) => {
+  const { text: stepText, classNameToClick: stepTargetClassName } = step;
+  const rotationXSkew = useMemo(
+    () => (Math.random() - 0.5) * ROTATION_X_VARIANCE,
     []
   );
-  const delay = useRef(delayInterval * 25);
+  const rotationYSkew = useMemo(
+    () => (Math.random() - 0.5) * ROTATION_Y_VARIANCE,
+    []
+  );
+  const rotationZSkew = useMemo(
+    () => (Math.random() - 0.5) * ROTATION_Z_VARIANCE,
+    []
+  );
+  const positionSkew = useMemo(
+    () => (Math.random() - 0.5) * POSITION_VARIANCE,
+    []
+  );
+
+  const [wordsDisplayed, setWordsDisplayed] = useState("");
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const wordsSeenSoFar = useRef("");
+  const currentCharIndex = useRef(0);
+  const queuedChars = useRef<{ char: string; classNameToClick: string }[]>([]);
+  const animationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startDelayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sentencePauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastStepIndexRef = useRef(stepIndex);
+
+  const clearAnimationTimers = () => {
+    if (animationIntervalRef.current) {
+      clearInterval(animationIntervalRef.current);
+      animationIntervalRef.current = null;
+    }
+    if (startDelayTimeoutRef.current) {
+      clearTimeout(startDelayTimeoutRef.current);
+      startDelayTimeoutRef.current = null;
+    }
+    if (sentencePauseTimeoutRef.current) {
+      clearTimeout(sentencePauseTimeoutRef.current);
+      sentencePauseTimeoutRef.current = null;
+    }
+  };
 
   useEffect(() => {
-    // never update the words displayed if we're hiding things.
-    if (!isCurrentStep) return;
+    if (lastStepIndexRef.current === stepIndex) {
+      return;
+    }
 
-    const queueLetter = () =>
-      setTimeout(() => {
-        const { char, classNameToClick } = queuedLetters.current.shift() ?? {};
+    lastStepIndexRef.current = stepIndex;
+    clearAnimationTimers();
+    wordsSeenSoFar.current = "";
+    queuedChars.current = [];
+    currentCharIndex.current = 0;
+    setWordsDisplayed("");
+    setIsAnimationComplete(false);
+  }, [stepIndex]);
 
-        if (!char) {
-          delay.current = delayInterval;
-          return queueLetter();
+  // Update character queue when the tour text changes
+  useEffect(() => {
+    const previouslySeen = wordsSeenSoFar.current;
+    const appendedText = previouslySeen && stepText.startsWith(previouslySeen)
+      ? stepText.slice(previouslySeen.length)
+      : stepText;
+
+    if (!appendedText) {
+      return;
+    }
+
+    const remainingChars =
+      currentCharIndex.current < queuedChars.current.length
+        ? queuedChars.current.slice(currentCharIndex.current)
+        : [];
+
+    const newChars = appendedText
+      .split("")
+      .map((char) => ({ char, classNameToClick: stepTargetClassName }));
+
+    queuedChars.current = [...remainingChars, ...newChars];
+    currentCharIndex.current = 0;
+    wordsSeenSoFar.current = stepText;
+  }, [stepTargetClassName, stepText]);
+
+  // Handle text animation with interval instead of recursive setTimeout
+  useEffect(() => {
+    if (!isCurrentStep || queuedChars.current.length === 0) {
+      return;
+    }
+
+    setIsAnimationComplete(false);
+    clearAnimationTimers();
+
+    const startTyping = () => {
+      if (animationIntervalRef.current) {
+        clearInterval(animationIntervalRef.current);
+        animationIntervalRef.current = null;
+      }
+
+      animationIntervalRef.current = setInterval(() => {
+        if (currentCharIndex.current >= queuedChars.current.length) {
+          clearAnimationTimers();
+          queuedChars.current = [];
+          currentCharIndex.current = 0;
+          setIsAnimationComplete(true);
+          return;
         }
 
-        // if we end a sentence, take a big breather.
-        if (char === ".") {
-          setWordsDisplayed((curWords) => (curWords += char));
-          delay.current += delayInterval * 10;
-          // a special character. queues the next button.
-          // not visible to the user.
-        } else if (char === "|") {
+        const { char, classNameToClick } =
+          queuedChars.current[currentCharIndex.current];
+
+        if (char === "|") {
           highlightNextButton(classNameToClick);
-        } else {
-          setWordsDisplayed((curWords) => (curWords += char));
-          // otherwise continue at the same letter rate.
-          delay.current = delayInterval;
+          currentCharIndex.current++;
+          return;
         }
 
-        return queueLetter();
-      }, delay.current);
+        if (char === ".") {
+          setWordsDisplayed((prev) => prev + char);
+          currentCharIndex.current++;
+          if (animationIntervalRef.current) {
+            clearInterval(animationIntervalRef.current);
+            animationIntervalRef.current = null;
+          }
+          if (sentencePauseTimeoutRef.current) {
+            clearTimeout(sentencePauseTimeoutRef.current);
+          }
+          sentencePauseTimeoutRef.current = setTimeout(() => {
+            if (!isCurrentStep) {
+              return;
+            }
+            startTyping();
+          }, SENTENCE_PAUSE_MS);
+          return;
+        }
 
-    const curTimeout = queueLetter();
-    return () => clearTimeout(curTimeout);
-  }, [isCurrentStep, highlightNextButton]);
+        setWordsDisplayed((prev) => prev + char);
+        currentCharIndex.current++;
+      }, CHAR_DELAY_MS);
+    };
 
-  useEffect(() => {
-    const { text, classNameToClick } = step;
-    const newText = text.replace(wordsSeenSoFar.current, "").split("");
-    queuedLetters.current.push(
-      ...newText.map((char) => ({
-        char,
-        classNameToClick,
-      }))
-    );
-    wordsSeenSoFar.current = text;
-  }, [step]);
+    startDelayTimeoutRef.current = setTimeout(startTyping, INITIAL_DELAY_MS);
+
+    return () => {
+      clearAnimationTimers();
+    };
+  }, [highlightNextButton, isCurrentStep, stepText]);
+
+  // Skip animation and show full text
+  const handleSkipAnimation = () => {
+    clearAnimationTimers();
+
+    // Show complete text without special characters
+    const fullText = stepText.replace(/\|/g, "");
+    setWordsDisplayed(fullText);
+    setIsAnimationComplete(true);
+    queuedChars.current = [];
+    currentCharIndex.current = 0;
+    wordsSeenSoFar.current = stepText;
+
+    // Trigger button highlight immediately
+    highlightNextButton(stepTargetClassName);
+
+    // Proceed to next step if handler provided
+    if (onNext) {
+      onNext();
+    }
+  };
 
   return (
     <div
@@ -126,21 +266,36 @@ const ProductTourNote = ({
         top: hide ? "-200px" : "12%",
       }}
     >
-      <div>{wordsDisplayed}</div>
+      <div style={{ minHeight: "60px" }}>{wordsDisplayed}</div>
       <div
         style={{
           display: "flex",
-          justifyContent: "start",
+          justifyContent: "space-between",
           width: "100%",
           gap: "8px",
+          flexWrap: "wrap",
         }}
       >
-        <InstructionsCardButton onClick={onClose}>
-          skip tour
-        </InstructionsCardButton>
-        <InstructionsCardButton onClick={restartTour}>
-          restart
-        </InstructionsCardButton>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <InstructionsCardButton onClick={onClose}>
+            skip tour
+          </InstructionsCardButton>
+          <InstructionsCardButton onClick={restartTour}>
+            restart
+          </InstructionsCardButton>
+        </div>
+        <div style={{ display: "flex", gap: "8px" }}>
+          {allowCloseAfterStep && isAnimationComplete && (
+            <InstructionsCardButton onClick={onClose}>
+              close card
+            </InstructionsCardButton>
+          )}
+          {!isAnimationComplete && (
+            <InstructionsCardButton onClick={handleSkipAnimation}>
+              next →
+            </InstructionsCardButton>
+          )}
+        </div>
       </div>
     </div>
   );

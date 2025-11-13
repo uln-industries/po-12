@@ -211,7 +211,7 @@ const TOUR_STEPS: Step[] = [
         classNameToClick: "recordButton",
       },
       {
-        text: ` Enjoy beatmaking!|`,
+        text: ` Enjoy beatmaking! Close this card whenever you're ready to jam.|`,
         classNameToClick: "playButton",
       },
     ],

@@ -1,14 +1,25 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import FixedMagnifyingGlass from "./MagnifyingGlass/FixedMagnifyingGlass";
 import ProductTourNote from "./InstructionsPaper/ProductTourNote";
 import { ProductTourIntro } from "./InstructionsPaper/ProductTourNote";
 import { type Step, TOUR_STEPS } from "./productTourInstructions";
 
+type TiltConfig = {
+  x: number;
+  y: number;
+};
+
+type ProductTourContentsProps = {
+  onFinish: () => void;
+  tilt: TiltConfig;
+  restartTour: () => void;
+};
+
 /**
  * Get the current step we're showing to users.
  * @param currentStep the step we're on so far
  * @param subStepIndex the index of the substep in that step
- * @returns what we should be showing rihgt now.
+ * @returns what we should be showing right now.
  */
 const getStepSoFar = (currentStep: Step, subStepIndex: number) => {
   const { substeps } = currentStep;
@@ -28,12 +39,15 @@ const getStepSoFar = (currentStep: Step, subStepIndex: number) => {
 
 /**
  * Shows the steps of the product tour one by one.
+ * Now only renders the current step card for better performance.
  */
-const ProductTourContents = ({ onFinish, tilt, restartTour }) => {
+const ProductTourContents = ({
+  onFinish,
+  tilt,
+  restartTour,
+}: ProductTourContentsProps) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [currentSubStepIndex, setCurrentSubStepIndex] = useState(0);
-
-  const REVERSED_TOUR_STEPS = useMemo(() => TOUR_STEPS.toReversed(), []);
 
   /**
    * Show the next step of the product tour.
@@ -64,45 +78,53 @@ const ProductTourContents = ({ onFinish, tilt, restartTour }) => {
     setClassNameToClick(nextClassName);
   }, []);
 
+  // Only get the current step data instead of rendering all steps
+  const currentStepData = TOUR_STEPS[currentStepIndex];
+  const currentStep = getStepSoFar(currentStepData, currentSubStepIndex);
+  const isFinalSubstep =
+    currentStepIndex === TOUR_STEPS.length - 1 &&
+    currentSubStepIndex === currentStepData.substeps.length - 1;
+
   return (
     <>
       <FixedMagnifyingGlass
         classNameToTarget={classNameToClick}
         onClick={goToNextStep}
       />
-      {REVERSED_TOUR_STEPS.map((currentStepThing, reverseI) => {
-        const i = REVERSED_TOUR_STEPS.length - 1 - reverseI;
-        const currentStep = getStepSoFar(
-          currentStepThing,
-          currentStepIndex === i ? currentSubStepIndex : 0
-        );
-
-        return (
-          <ProductTourNote
-            key={`productTourNoteWithText-${currentStepThing.substeps[0].text}`}
-            tilt={tilt}
-            step={currentStep}
-            hide={i < currentStepIndex}
-            onClose={onFinish}
-            restartTour={restartTour}
-            isCurrentStep={i === currentStepIndex}
-            highlightNextButton={highlightNextButton}
-          />
-        );
-      })}
+      <ProductTourNote
+        tilt={tilt}
+        step={currentStep}
+        stepIndex={currentStepIndex}
+        hide={false}
+        onClose={onFinish}
+        restartTour={restartTour}
+        isCurrentStep={true}
+        highlightNextButton={highlightNextButton}
+        onNext={goToNextStep}
+        allowCloseAfterStep={isFinalSubstep}
+      />
     </>
   );
 };
 
+type ProductTourMode = "finished" | "intro" | "tour";
+
+type ProductTourProps = {
+  productTourMode: ProductTourMode | undefined;
+  setProductTourMode: (mode: ProductTourMode) => void;
+  onTourStart: () => void;
+  tilt: TiltConfig;
+};
+
 /**
- * Configures the product tour. Helps the user progress thru.
+ * Configures the product tour. Helps the user progress through the tutorial.
  */
 const ProductTour = ({
   productTourMode,
   setProductTourMode,
   onTourStart,
   tilt,
-}) => {
+}: ProductTourProps) => {
   return (
     <>
       {productTourMode === "tour" && (
