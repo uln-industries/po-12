@@ -35,52 +35,29 @@ const InstructionsPaper = ({
   takeTour,
   onTouchDevice,
 }: InstructionsPaperProps) => {
-  const [open, setOpen] = useState(false);
+  // Always show as open when in modal
+  const [open, setOpen] = useState(true);
 
   return (
     <div
-      className={cn(classes.stage, (pinned || open) && classes.open)}
+      className={cn(classes.stage, classes.open, classes.inModal)}
       style={{
         transform: `rotateX(${y}deg) rotateY(${x}deg)`,
-        width: open ? "312px" : "250px",
-        height: open ? "312px" : "200px",
+        width: "312px",
+        height: "312px",
         color: "rgba(0, 0, 0, 0.75)",
         textShadow: "0 2px 2px rgba(0, 0, 0, 0.1)",
-        ...(!showing && !pinned && onTouchDevice
-          ? {
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              marginRight: "8px",
-            }
-          : {}),
       }}
       onClick={(e) => {
         e.stopPropagation();
-
-        setOpen((open) => !open);
-        setShowing((showing) => !showing);
       }}
-      onMouseLeave={
-        !onTouchDevice && open
-          ? (e) => {
-              e.preventDefault();
-              setOpen(false);
-              setShowing(false);
-            }
-          : undefined
-      }
     >
       <div
         className={cn(classes.box, classes.box1)}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-
-          setOpen((open) => !open);
-          setShowing((showing) => !showing);
         }}
-        onMouseEnter={onTouchDevice ? undefined : () => setOpen(true)}
       >
         <div>
           PO-12 rhythm

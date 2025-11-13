@@ -1,0 +1,50 @@
+/* Help button styling */
+.helpButton {
+  position: fixed;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(248, 243, 232, 0.95);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+
+  font-size: 28px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.75);
+
+  cursor: pointer;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    background: rgba(248, 243, 232, 1);
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &.desktop {
+    bottom: 2rem;
+    left: 2rem;
+  }
+
+  &.mobile {
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+}

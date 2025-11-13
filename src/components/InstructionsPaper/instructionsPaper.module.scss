@@ -24,6 +24,13 @@ $cardBorderRadius: 1px;
   padding-top: 30px;
 }
 
+/* When in modal, remove problematic positioning */
+.inModal {
+  margin-top: 0;
+  padding-top: 0;
+  position: relative;
+}
+
 .open {
   @extend .cardBoxShadow;
   transition-delay: calc(#{$foldSpeed} * 2);
