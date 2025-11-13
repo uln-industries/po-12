@@ -81,6 +81,9 @@ const ProductTourContents = ({
   // Only get the current step data instead of rendering all steps
   const currentStepData = TOUR_STEPS[currentStepIndex];
   const currentStep = getStepSoFar(currentStepData, currentSubStepIndex);
+  const isFinalSubstep =
+    currentStepIndex === TOUR_STEPS.length - 1 &&
+    currentSubStepIndex === currentStepData.substeps.length - 1;
 
   return (
     <>
@@ -98,6 +101,7 @@ const ProductTourContents = ({
         isCurrentStep={true}
         highlightNextButton={highlightNextButton}
         onNext={goToNextStep}
+        allowCloseAfterStep={isFinalSubstep}
       />
     </>
   );

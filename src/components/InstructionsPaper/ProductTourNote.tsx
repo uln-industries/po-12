@@ -73,6 +73,7 @@ type ProductTourNoteProps = {
   restartTour: () => void;
   highlightNextButton: (className: string) => void;
   onNext?: () => void;
+  allowCloseAfterStep?: boolean;
 };
 
 const ProductTourNote = ({
@@ -85,6 +86,7 @@ const ProductTourNote = ({
   restartTour,
   highlightNextButton,
   onNext,
+  allowCloseAfterStep = false,
 }: ProductTourNoteProps) => {
   const { text: stepText, classNameToClick: stepTargetClassName } = step;
   const rotationXSkew = useMemo(
@@ -282,11 +284,18 @@ const ProductTourNote = ({
             restart
           </InstructionsCardButton>
         </div>
-        {!isAnimationComplete && (
-          <InstructionsCardButton onClick={handleSkipAnimation}>
-            next →
-          </InstructionsCardButton>
-        )}
+        <div style={{ display: "flex", gap: "8px" }}>
+          {allowCloseAfterStep && isAnimationComplete && (
+            <InstructionsCardButton onClick={onClose}>
+              close card
+            </InstructionsCardButton>
+          )}
+          {!isAnimationComplete && (
+            <InstructionsCardButton onClick={handleSkipAnimation}>
+              next →
+            </InstructionsCardButton>
+          )}
+        </div>
       </div>
     </div>
   );
