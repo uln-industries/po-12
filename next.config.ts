@@ -1,5 +1,3 @@
-import path from "path";
-
 /**
  * A fork of 'next-pwa' that has app directory support
  * @see https://github.com/shadowwalker/next-pwa/issues/424#issuecomment-1332258575
@@ -14,26 +12,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack(config, { isServer }) {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@": path.join(__dirname, "src"),
-    };
-
-    // Simplified SVG handling
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ["@svgr/webpack"],
-    });
-
-    // Simplified audio handling
-    config.module.rules.push({
-      test: /\.(ogg|mp3|wav|mpe?g)$/i,
-      type: "asset/resource",
-    });
-
-    return config;
-  },
+  turbopack: {},
 };
 
 const KEYS_TO_OMIT = [

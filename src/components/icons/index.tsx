@@ -1,11 +1,11 @@
-import SCurve from "./s-curve.svg";
-import Metronome from "./metronome.svg";
-import Asterisk from "./asterisk.svg";
-import Play from "./play.svg";
-import Record from "./record.svg";
+import SCurve from "./SCurve";
+import Metronome from "./Metronome";
+import Asterisk from "./Asterisk";
+import Play from "./Play";
+import Record from "./Record";
 import GoodEnoughArrow from "./GoodEnoughArrow";
-import ThinMetronomeLeft from "./thin-metronome-left.svg";
-import Grip from "./grip.svg";
+import ThinMetronomeLeft from "./ThinMetronomeLeft";
+import Grip from "./Grip";
 
 export {
   SCurve,
