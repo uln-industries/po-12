@@ -1,11 +1,11 @@
-/* Modal overlay and content */
+/* Modal overlay and content - mobile first */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   z-index: 998;
 
@@ -13,21 +13,38 @@
   align-items: center;
   justify-content: center;
 
-  padding: 1rem;
+  /* Mobile first - minimal padding on small screens */
+  padding: 0;
 
   animation: fadeIn 0.2s ease;
+
+  /* Touch-friendly tap target */
+  -webkit-tap-highlight-color: transparent;
+
+  /* Desktop gets padding */
+  @media (min-width: 640px) {
+    padding: 1rem;
+  }
 }
 
 .modalContent {
   position: relative;
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  animation: slideUp 0.3s ease;
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Desktop sizing */
+  @media (min-width: 640px) {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
 }
 
 @keyframes fadeIn {
@@ -42,17 +59,10 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Mobile optimizations */
-@media (pointer: coarse) {
-  .modalOverlay {
-    padding: 0.5rem;
+    transform: translateY(0) scale(1);
   }
 }
