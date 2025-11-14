@@ -2,7 +2,7 @@
 $paperBorderColor: #f8f3e8;
 $paperCenterColor: #faf7f0;
 
-/* Simplified instructions container - mobile first */
+/* Simplified instructions container - mobile first, dense like the manual */
 .instructionsContainer {
   background: $paperCenterColor;
   border-radius: 8px;
@@ -13,65 +13,65 @@ $paperCenterColor: #faf7f0;
   overflow-y: auto;
   color: rgba(0, 0, 0, 0.85);
 
-  /* Mobile first sizing */
+  /* Mobile first sizing - compact */
   @media (min-width: 640px) {
-    max-width: 600px;
+    max-width: 480px;
     max-height: 85vh;
   }
 
   @media (min-width: 768px) {
-    max-width: 700px;
+    max-width: 520px;
   }
 }
 
 .instructionsHeader {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 0.3);
 
   h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.0625rem;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.85);
 
     @media (min-width: 640px) {
-      font-size: 1.5rem;
+      font-size: 1.125rem;
     }
   }
 }
 
 .instructionsContent {
-  padding: 1.5rem;
+  padding: 1rem;
 
   @media (min-width: 640px) {
-    padding: 2rem;
+    padding: 1.125rem;
   }
 }
 
 .instructionsSection {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 
   &:last-child {
     margin-bottom: 0;
   }
 
   h3 {
-    margin: 0 0 1rem 0;
-    font-size: 1.125rem;
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.85);
 
     @media (min-width: 640px) {
-      font-size: 1.25rem;
+      font-size: 1rem;
     }
   }
 
   h4 {
-    margin: 0 0 0.5rem 0;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: rgba(0, 0, 0, 0.7);
+    margin: 0 0 0.375rem 0;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.6);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -83,20 +83,21 @@ $paperCenterColor: #faf7f0;
   padding: 0;
 
   li {
-    padding: 0.5rem 0;
-    font-size: 0.9375rem;
-    line-height: 1.5;
+    padding: 0.25rem 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.375rem;
 
     svg {
       display: inline-block;
       vertical-align: middle;
+      flex-shrink: 0;
     }
 
     @media (min-width: 640px) {
-      font-size: 1rem;
+      font-size: 0.875rem;
     }
   }
 }
@@ -104,32 +105,32 @@ $paperCenterColor: #faf7f0;
 .keymapGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
+  gap: 1rem;
+  margin-bottom: 0.625rem;
 
   @media (min-width: 640px) {
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    gap: 1.25rem;
   }
 }
 
 .keymapSection {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .controlKeymap {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  font-size: 0.9375rem;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
 }
 
 .instructionsPaperKeymap {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.25rem;
   align-items: center;
 }
 
@@ -137,10 +138,11 @@ $paperCenterColor: #faf7f0;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.25rem;
 
   svg {
     display: inline-block;
+    flex-shrink: 0;
   }
 }
 
@@ -149,17 +151,17 @@ $paperCenterColor: #faf7f0;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(0, 0, 0, 0.3);
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 3px;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   background: rgba(255, 255, 255, 0.5);
 
   @media (min-width: 640px) {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
   }
 }
 
@@ -168,53 +170,53 @@ $paperCenterColor: #faf7f0;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(0, 0, 0, 0.3);
-  min-width: 28px;
-  height: 28px;
-  padding: 0 0.5rem;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 0.375rem;
   border-radius: 3px;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   background: rgba(255, 255, 255, 0.5);
 
   @media (min-width: 640px) {
-    min-width: 32px;
-    height: 32px;
-    font-size: 1rem;
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
   }
 }
 
 .importExportHint {
   display: flex;
   justify-content: space-between;
-  padding: 0.75rem 0;
-  margin-top: 1rem;
+  padding: 0.5rem 0;
+  margin-top: 0.625rem;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: rgba(0, 0, 0, 0.6);
 }
 
 .disclaimer {
-  font-size: 0.875rem;
-  line-height: 1.5;
+  font-size: 0.75rem;
+  line-height: 1.4;
   color: rgba(0, 0, 0, 0.7);
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.625rem 0;
 }
 
 .links {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.375rem;
+  margin-bottom: 0.625rem;
 
   @media (min-width: 640px) {
     flex-direction: row;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   a {
     color: rgb(107, 114, 128);
     text-decoration: none;
-    font-size: 0.9375rem;
+    font-size: 0.75rem;
     transition: color 0.2s ease;
 
     &:hover {
@@ -225,7 +227,7 @@ $paperCenterColor: #faf7f0;
 }
 
 .attribution {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: rgba(0, 0, 0, 0.6);
   margin: 0;
 
@@ -242,16 +244,16 @@ $paperCenterColor: #faf7f0;
 }
 
 .instructionsFooter {
-  padding: 1rem 1.5rem;
-  border-top: 2px solid rgba(0, 0, 0, 0.1);
+  padding: 0.625rem 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 0.3);
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   justify-content: flex-end;
   flex-wrap: wrap;
 
   @media (min-width: 640px) {
-    padding: 1.25rem 2rem;
+    padding: 0.75rem 1.125rem;
   }
 }
 
