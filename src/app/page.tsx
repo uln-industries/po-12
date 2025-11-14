@@ -21,7 +21,6 @@ const PocketOperatorWrapper = () => {
   const onTouchDevice = useIsTouchDevice();
 
   const [show, setShowing] = useState(false);
-  const [pinned, setPinned] = useState(false);
 
   const [productTourMode, setProductTourMode] = useLocalStorage<
     "finished" | "intro" | "tour" | undefined
@@ -123,11 +122,7 @@ const PocketOperatorWrapper = () => {
           <InstructionsModal
             showing={show}
             setShowing={setShowing}
-            pinned={pinned}
-            setPinned={setPinned}
-            onTouchDevice={onTouchDevice}
             takeTour={() => {
-              setPinned(false);
               setShowing(false);
               setProductTourMode("intro");
             }}

@@ -13,10 +13,7 @@ import type { Dispatch, SetStateAction } from "react";
 
 type InstructionsPaperProps = {
   setShowing: Dispatch<SetStateAction<boolean>>;
-  pinned: boolean;
-  setPinned: Dispatch<SetStateAction<boolean>>;
   takeTour: () => void;
-  onTouchDevice: boolean;
 };
 
 /**
@@ -24,10 +21,7 @@ type InstructionsPaperProps = {
  */
 const InstructionsPaper = ({
   setShowing,
-  pinned,
-  setPinned,
   takeTour,
-  onTouchDevice,
 }: InstructionsPaperProps) => {
   return (
     <div className={classes.instructionsContainer}>
@@ -170,17 +164,7 @@ const InstructionsPaper = ({
         <InstructionsCardButton onClick={takeTour}>
           take tour
         </InstructionsCardButton>
-        {!onTouchDevice && (
-          <InstructionsCardButton onClick={() => setPinned((p) => !p)}>
-            {pinned ? "unpin" : "pin"}
-          </InstructionsCardButton>
-        )}
-        <InstructionsCardButton
-          onClick={() => {
-            setShowing(false);
-            setPinned(false);
-          }}
-        >
+        <InstructionsCardButton onClick={() => setShowing(false)}>
           close
         </InstructionsCardButton>
       </div>
