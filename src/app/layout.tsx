@@ -3,7 +3,7 @@ import { Open_Sans } from "next/font/google";
 import { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
 
-const faviconPath = "pocket-operator-favicons";
+const faviconPath = "favicons";
 
 export const metadata: Metadata = {
   title: "PO-12 | uln.industries",
