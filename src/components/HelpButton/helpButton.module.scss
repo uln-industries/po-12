@@ -1,8 +1,8 @@
 /* Help button styling */
 .helpButton {
   position: fixed;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: rgba(248, 243, 232, 0.95);
   border: 2px solid rgba(0, 0, 0, 0.1);
@@ -10,7 +10,7 @@
     0 2px 8px rgba(0, 0, 0, 0.15),
     0 1px 3px rgba(0, 0, 0, 0.1);
 
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.75);
 
@@ -44,7 +44,18 @@
   }
 
   &.mobile {
-    bottom: 1.5rem;
-    right: 1.5rem;
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+
+    &.mobile {
+      bottom: 1.5rem;
+      right: 1.5rem;
+    }
   }
 }

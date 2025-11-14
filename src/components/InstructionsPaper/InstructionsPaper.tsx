@@ -1,7 +1,6 @@
 import classes from "./instructionsPaper.module.scss";
 import {
   OneButtonIcon,
-  SixteenButtonIcon,
   DotgridIcon,
   SCurveIcon,
   MetronomeIcon,
@@ -23,6 +22,35 @@ const InstructionsPaper = ({
   setShowing,
   takeTour,
 }: InstructionsPaperProps) => {
+  const panelControls = [
+    { icon: <OneButtonIcon />, label: "note trig", detail: "1-16" },
+    { icon: <DotgridIcon />, label: "pattern", detail: "select bank" },
+    { icon: <SCurveIcon />, label: "sound", detail: "swap voice" },
+    { icon: <MetronomeIcon />, label: "bpm", detail: "tempo + swing" },
+    { icon: <RecordIcon />, label: "record", detail: "hold + trig" },
+    { icon: <PlayIcon />, label: "play", detail: "transport" },
+  ];
+
+  const controlShortcuts = [
+    { icon: <SCurveIcon />, label: "sound", key: "j" },
+    { icon: <DotgridIcon />, label: "pattern", key: "k" },
+    { icon: <MetronomeIcon />, label: "bpm", key: "l" },
+    { icon: <RecordIcon />, label: "record", key: "·" },
+    { icon: <PlayIcon />, label: "play", key: "⎵" },
+  ];
+
+  const transferShortcuts = [
+    { label: "import pattern", key: "]" },
+    { label: "export pattern", key: "[" },
+  ];
+
+  const noteRows = [
+    ["1", "2", "3", "4"],
+    ["q", "w", "e", "r"],
+    ["a", "s", "d", "f"],
+    ["z", "x", "c", "v"],
+  ];
+
   return (
     <div className={classes.instructionsContainer}>
       <div className={classes.instructionsHeader}>
@@ -30,106 +58,77 @@ const InstructionsPaper = ({
       </div>
 
       <div className={classes.instructionsContent}>
-        <section className={classes.instructionsSection}>
-          <h3>Controls</h3>
-          <ul className={classes.controlsList}>
-            <li>
-              <OneButtonIcon /> - <SixteenButtonIcon />: play note
-            </li>
-            <li>
-              <DotgridIcon />: choose pattern
-            </li>
-            <li>
-              <SCurveIcon />: choose sound
-            </li>
-            <li>
-              <MetronomeIcon />: change bpm
-            </li>
-            <li>
-              <RecordIcon />: record
-            </li>
-            <li>
-              <PlayIcon />: play
-            </li>
-          </ul>
-        </section>
-
-        <section className={classes.instructionsSection}>
-          <h3>Keyboard Shortcuts</h3>
-          <div className={classes.keymapGrid}>
-            <div className={classes.keymapSection}>
-              <h4>Notes</h4>
-              <div className={classes.instructionsPaperKeymap}>
-                <div className={classes.instructionsPaperRow}>
-                  <div className={classes.instructionsPaperCell}>1</div>
-                  <div className={classes.instructionsPaperCell}>2</div>
-                  <div className={classes.instructionsPaperCell}>3</div>
-                  <div className={classes.instructionsPaperCell}>4</div>
-                </div>
-                <div className={classes.instructionsPaperRow}>
-                  <div className={classes.instructionsPaperCell}>q</div>
-                  <div className={classes.instructionsPaperCell}>w</div>
-                  <div className={classes.instructionsPaperCell}>e</div>
-                  <div className={classes.instructionsPaperCell}>r</div>
-                </div>
-                <div className={classes.instructionsPaperRow}>
-                  <div className={classes.instructionsPaperCell}>a</div>
-                  <div className={classes.instructionsPaperCell}>s</div>
-                  <div className={classes.instructionsPaperCell}>d</div>
-                  <div className={classes.instructionsPaperCell}>f</div>
-                </div>
-                <div className={classes.instructionsPaperRow}>
-                  <div className={classes.instructionsPaperCell}>z</div>
-                  <div className={classes.instructionsPaperCell}>x</div>
-                  <div className={classes.instructionsPaperCell}>c</div>
-                  <div className={classes.instructionsPaperCell}>v</div>
-                </div>
-              </div>
+        <div className={classes.instructionsGrid}>
+          <section className={classes.instructionsSection}>
+            <div className={classes.sectionHeading}>
+              <h3>Panel</h3>
+              <span className={classes.sectionMeta}>icon → function</span>
             </div>
+            <ul className={classes.panelGrid}>
+              {panelControls.map(({ icon, label, detail }) => (
+                <li key={label} className={classes.panelItem}>
+                  {icon}
+                  <div className={classes.panelCopy}>
+                    <span>{label}</span>
+                    {detail ? <small>{detail}</small> : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-            <div className={classes.keymapSection}>
-              <h4>Controls</h4>
-              <div className={classes.controlKeymap}>
-                <div className={classes.instructionsPaperRow}>
-                  <SCurveIcon />
-                  {" ↔ "}
-                  <div className={classes.instructionsPaperKey}>j</div>
-                </div>
-                <div className={classes.instructionsPaperRow}>
-                  <DotgridIcon />
-                  {" ↔ "}
-                  <div className={classes.instructionsPaperKey}>k</div>
-                </div>
-                <div className={classes.instructionsPaperRow}>
-                  <MetronomeIcon />
-                  {" ↔ "}
-                  <div className={classes.instructionsPaperKey}>l</div>
-                </div>
-                <div className={classes.instructionsPaperRow}>
-                  <RecordIcon />
-                  {" ↔ "}
-                  <div className={classes.instructionsPaperKey}>&#183;</div>
-                </div>
-                <div className={classes.instructionsPaperRow}>
-                  <PlayIcon />
-                  {" ↔ "}
-                  <div className={classes.instructionsPaperKey}>&#9141;</div>
-                </div>
-              </div>
+          <section className={classes.instructionsSection}>
+            <div className={classes.sectionHeading}>
+              <h3>Ctrl keys</h3>
+              <span className={classes.sectionMeta}>left hand</span>
             </div>
-          </div>
+            <div className={classes.controlShortcuts}>
+              {controlShortcuts.map(({ icon, label, key }) => (
+                <div key={label} className={classes.controlShortcut}>
+                  {icon}
+                  <div className={classes.shortcutCopy}>
+                    <span>{label}</span>
+                    <div className={classes.instructionsPaperKey}>{key}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className={classes.utilityShortcuts}>
+              {transferShortcuts.map(({ label, key }) => (
+                <div key={label} className={classes.utilityShortcut}>
+                  <span>{label}</span>
+                  <span className={classes.utilityKey}>{key}</span>
+                </div>
+              ))}
+            </div>
+          </section>
 
-          <div className={classes.importExportHint}>
-            <span>] import</span>
-            <span>export [→</span>
-          </div>
-        </section>
+          <section className={classes.instructionsSection}>
+            <div className={classes.sectionHeading}>
+              <h3>Note grid</h3>
+              <span className={classes.sectionMeta}>mirrors keypad</span>
+            </div>
+            <div className={classes.instructionsPaperKeymap}>
+              {noteRows.map((row, rowIndex) => (
+                <div key={`note-row-${rowIndex}`} className={classes.instructionsPaperRow}>
+                  {row.map((key) => (
+                    <div key={key} className={classes.instructionsPaperCell}>
+                      {key}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
 
-        <section className={classes.instructionsSection}>
-          <h3>About</h3>
+        <section className={`${classes.instructionsSection} ${classes.aboutSection}`}>
+          <div className={classes.sectionHeading}>
+            <h3>About</h3>
+            <span className={classes.sectionMeta}>credits</span>
+          </div>
           <p className={classes.disclaimer}>
-            This is an unlicensed partial reimplementation of a hardware device.
-            All design credit goes to Teenage Engineering.
+            Tribute interface for PO-12 rhythm. Teenage Engineering owns the original hardware + art.
           </p>
           <div className={classes.links}>
             <a
@@ -137,26 +136,21 @@ const InstructionsPaper = ({
               target="_blank"
               rel="noopener noreferrer"
             >
-              Buy original
+              buy original
             </a>
+            <span>•</span>
             <a
               href="https://teenage.engineering/guides/po-12/en"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Full manual
+              full manual
             </a>
-          </div>
-          <p className={classes.attribution}>
-            by{" "}
-            <a
-              href="https://twitter.com/@jakeissnt"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <span>•</span>
+            <a href="https://twitter.com/@jakeissnt" target="_blank" rel="noopener noreferrer">
               @jakeissnt
             </a>
-          </p>
+          </div>
         </section>
       </div>
 
