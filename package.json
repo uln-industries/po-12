@@ -20,7 +20,7 @@
     "react"
   ],
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=22.x"
   },
   "scripts": {
     "dev": "next dev --turbo",
