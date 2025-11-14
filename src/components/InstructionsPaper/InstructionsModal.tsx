@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import InstructionsPaper from "./InstructionsPaper";
 import classes from "./instructionsModal.module.scss";
-import { cn } from "@/lib/utils";
 import type { Dispatch, SetStateAction } from "react";
 
 type InstructionsModalProps = {
@@ -66,8 +65,6 @@ const InstructionsModal = ({
         onClick={(e) => e.stopPropagation()}
       >
         <InstructionsPaper
-          tilt={{ x: 0, y: 0 }}
-          showing={showing}
           setShowing={setShowing}
           pinned={pinned}
           setPinned={setPinned}

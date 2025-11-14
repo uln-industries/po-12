@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import classes from "./instructionsPaper.module.scss";
 import {
   OneButtonIcon,
@@ -13,8 +12,6 @@ import InstructionsCardButton from "./InstructionsCardButton";
 import type { Dispatch, SetStateAction } from "react";
 
 type InstructionsPaperProps = {
-  tilt: { x: number; y: number };
-  showing: boolean;
   setShowing: Dispatch<SetStateAction<boolean>>;
   pinned: boolean;
   setPinned: Dispatch<SetStateAction<boolean>>;
@@ -26,7 +23,6 @@ type InstructionsPaperProps = {
  * A simplified instructions card that displays help information.
  */
 const InstructionsPaper = ({
-  showing,
   setShowing,
   pinned,
   setPinned,
