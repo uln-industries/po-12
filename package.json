@@ -45,7 +45,7 @@
     "@typescript-eslint/parser": "^8.49.0",
     "eslint": "^9.39.1",
     "eslint-config-next": "^15.5.7",
-    "next": "^16.0.7",
+    "next": "16.0.10",
     "sass": "^1.94.2",
     "typescript": "^5.9.3",
     "vercel": "^48.12.1"
