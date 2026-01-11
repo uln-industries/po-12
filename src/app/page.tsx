@@ -37,6 +37,7 @@ const PocketOperatorWrapper = () => {
     supportedPatternIndices,
     togglePatternNote,
     setPatternsFromFile,
+    setUploadFailed,
     uploadingState,
     resetPatterns,
   } = usePatterns();
@@ -90,6 +91,7 @@ const PocketOperatorWrapper = () => {
               supportedPatternIndices,
               togglePatternNote,
               setPatternsFromFile,
+              setUploadFailed,
               uploadingState,
               bpm,
               setBPM,
