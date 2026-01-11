@@ -44,6 +44,7 @@ type PatternConfig = {
     note: number
   ) => void;
   setPatternsFromFile: (file: File) => void;
+  setUploadFailed: () => void;
   uploadingState?: "fail" | "success";
   bpm: number;
   setBPM: (bpm: number) => void;
@@ -79,6 +80,7 @@ const PocketOperator = ({
     supportedPatternIndices,
     togglePatternNote,
     setPatternsFromFile,
+    setUploadFailed,
     uploadingState,
     bpm,
     setBPM,
@@ -215,7 +217,9 @@ const PocketOperator = ({
         className={cn(classes.leftCutout, "importPatternsButton")}
         role="button"
         aria-label="Upload patterns"
-        onClick={() => importPatternFile().then(setPatternsFromFile)}
+        onClick={() =>
+          importPatternFile().then(setPatternsFromFile).catch(setUploadFailed)
+        }
       >
         <div>JAM</div>
         <div className={classes.tooltip1}>

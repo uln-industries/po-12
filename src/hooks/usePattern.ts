@@ -207,11 +207,22 @@ const usePatterns = () => {
     [setPatterns]
   );
 
+  /**
+   * Set the uploading state to fail (for external error handling).
+   */
+  const setUploadFailed = useCallback(() => {
+    setUploadingState("fail");
+    setTimeout(() => {
+      setUploadingState(undefined);
+    }, 1000);
+  }, []);
+
   return {
     patterns,
     supportedPatternIndices,
     togglePatternNote,
     setPatternsFromFile,
+    setUploadFailed,
     uploadingState,
     resetPatterns,
   };
